@@ -14,14 +14,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.Detector;
-import com.google.android.gms.vision.text.TextBlock;
-import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.android.gms.vision.*;
+import com.google.android.gms.vision.text.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private CameraSource cameraSource;
     private final int RequestCameraPermissionID = 1001;
     private String TAG = this.getClass().getName();
+    private Button captureBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        captureBtn = (Button) findViewById(R.id.captureBtn);
+        captureBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                askAmount();
+            }
+        });
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -53,8 +66,26 @@ public class MainActivity extends AppCompatActivity {
             Log.w("MainActivity", "Detector dependencies are not yet available");
         } else {
             setUpCameraSource(textRecognizer);
+            List<String> prices = setUpTextRec(textRecognizer);
+            String price;
+            for (String s : prices){
+                // trim the white space out of each element, and break them down to character sequence
+                char[] seqs = s.trim().toCharArray();
+                for (int i=0; i< seqs.length;i++){
+                    // if the character is a decimal point and there are 2 chars after it. e.g. 32.24
+                    if(seqs[i]=='.' && i==seqs.length-3){
+                        price = seqs.toString();
+                    }
+                } // end for
+            }// end foreach
 
+            //TODO: ask user if the amount is correct
+            askAmount();
         }
+    }
+
+    private void askAmount() {
+        AskAmountDialog askAmountDialog = new AskAmountDialog();
     }
 
     @Override
@@ -159,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
     }// end setUpCameraSource
 
 
-    private void setUpTextRec(TextRecognizer textRecognizer){
+    private List<String> setUpTextRec(TextRecognizer textRecognizer){
+        final List<String> prices = new ArrayList<>();
         textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
             @Override
             public void release() {
@@ -170,19 +202,18 @@ public class MainActivity extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<TextBlock> detections) {
 
                 final SparseArray<TextBlock> items = detections.getDetectedItems();
-                if(items.size() != 0)
-                {
-                    String str;
+                if(items.size() != 0) {
                     textView.post(new Runnable() {
                         @Override
                         public void run() {
                             StringBuilder stringBuilder = new StringBuilder();
-                            for(int i =0;i<items.size();++i)
-                            {
+                            for(int i =0; i<items.size(); ++i) {
                                 TextBlock item = items.valueAt(i);
-                                stringBuilder.append(item.getValue());
-                                stringBuilder.append("\n");
-
+//                                stringBuilder.append(item.getValue());
+//                                stringBuilder.append("\n");
+                                if (item.getValue().contains("."))
+                                    //stringBuilder.append(item.getValue());
+                                    prices.add(item.getValue());
                             }
                             textView.setText(stringBuilder.toString());
                         }
@@ -190,6 +221,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });// end setProcessor
-
+        return prices;
     }
 }
