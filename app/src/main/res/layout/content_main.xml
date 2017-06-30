@@ -42,4 +42,14 @@
         android:layout_alignEnd="@+id/surface_view"
         android:layout_alignBottom="@+id/text_view"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter amount manually"
+        android:id="@+id/enterAmountBtn"
+        android:layout_below="@+id/captureBtn"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/captureBtn" />
 </RelativeLayout>

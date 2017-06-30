@@ -1,10 +1,12 @@
 package com.dylanhelps.tipmeister;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private CameraSource cameraSource;
     private final int RequestCameraPermissionID = 1001;
     private String TAG = this.getClass().getName();
-    private Button captureBtn;
+    private Button captureBtn, enterAmountBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        enterAmountBtn = (Button) findViewById(R.id.enterAmountBtn);
+        enterAmountBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this,EnterAmount.class));
+            }
+        });
 
         captureBtn = (Button) findViewById(R.id.captureBtn);
         captureBtn.setOnClickListener(new View.OnClickListener() {
@@ -85,7 +95,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void askAmount() {
-        AskAmountDialog askAmountDialog = new AskAmountDialog();
+        //AskAmountDialog askAmountDialog = new AskAmountDialog();`
+        FragmentManager fm = getSupportFragmentManager();
+        AskAmountDialog ask = AskAmountDialog.getInstance("Is it correct");
+        ask.show(getSupportFragmentManager(),"ask_amount");
     }
 
     @Override
